@@ -1,0 +1,8 @@
+pandas
+numpy
+scikit-learn
+torch-geometric
+fastapi
+uvicorn
+streamlit
+requests
