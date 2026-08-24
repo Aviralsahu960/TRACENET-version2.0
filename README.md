@@ -214,20 +214,6 @@ Open **http://localhost:8501**
 - Static model — requires periodic retraining as new criminal cases are confirmed
 - False positives exist (172 in test set) — production deployment would require human review workflow for borderline cases
 
----
-
-## Team
-
-**VIT Bhopal University — B.Tech AI/ML — DSN2098 — 2026 Batch**
-
-| Role | Responsibility |
-|---|---|
-| Model Lead | GNN architecture, training pipeline, coordination |
-| Evaluation | XGBoost baseline comparison, metrics analysis |
-| Backend | FastAPI server, /score_transaction endpoint |
-| Frontend | Streamlit dashboard, interbank sharing view |
-| Literature Review | Related work, academic research summary |
-| Documentation | Report compilation, ethics section, demo |
 
 ---
 
@@ -239,4 +225,4 @@ Open **http://localhost:8501**
 
 ---
 
-*TraceNet v2 — VIT Bhopal • DSN2098 • August 2026*
+*TraceNet v2 • August 2026*
