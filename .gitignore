@@ -1,5 +1,7 @@
 tracenet_env/
 data/
-models/gnn_model.pth
 __pycache__/
 *.pyc
+*.pth
+*.pkl
+.env
