@@ -21,4 +21,5 @@ httpx
 
 # Utilities
 python-dotenv
+streamlit
 requests
