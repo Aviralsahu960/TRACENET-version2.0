@@ -1,8 +1,24 @@
+# Core ML
+torch
+torch-geometric
+
+# Data
 pandas
 numpy
 scikit-learn
-torch-geometric
+
+# Backend
 fastapi
-uvicorn
-streamlit
+uvicorn[standard]
+python-multipart
+
+# Evaluation
+xgboost
+
+# Testing
+pytest
+httpx
+
+# Utilities
+python-dotenv
 requests

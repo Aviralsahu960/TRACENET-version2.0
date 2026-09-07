@@ -1,7 +1,23 @@
+# Virtual environment
 tracenet_env/
+
+# Raw dataset (too large for git — 689 MB)
+elliptic_bitcoin_dataset/
 data/
+
+# Python cache
 __pycache__/
 *.pyc
-*.pth
-*.pkl
+*.pyo
+
+# Environment variables (never commit real secrets)
 .env
+
+# NOTE: models/ directory IS committed:
+#   models/gnn_model.pth         ← trained weights (241 KB) ✅ committed
+#   models/model_config.json     ← metrics config (445 B)   ✅ committed
+#   models/processed_data.npz    ← preprocessed graph data  ✅ committed
+
+# IDE
+.vscode/
+.idea/
