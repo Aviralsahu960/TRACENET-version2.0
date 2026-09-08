@@ -113,8 +113,8 @@ This prevents the binary block/approve flaw of v1 — borderline cases go to hum
 | Data | pandas, numpy | Loading and processing Elliptic CSVs |
 | Evaluation | scikit-learn | Train/test split, metrics, confusion matrix |
 | Backend | FastAPI + uvicorn | REST API for real-time transaction scoring |
-| Frontend | Streamlit | Interactive dashboard |
-| Language | Python 3.12 | Everything — one language, no integration overhead |
+| Frontend | HTML, CSS, Vanilla JS | Interactive dashboard and graph forensics (Cytoscape.js) |
+| Deployment | Railway (Backend) + Netlify (Frontend) | Live cloud hosting |
 
 ---
 
@@ -131,8 +131,11 @@ tracenet-v2/
 │   └── model_config.json      ← metrics and architecture config
 ├── backend/
 │   └── api.py                 ← FastAPI server
-├── frontend/
-│   └── app.py                 ← Streamlit dashboard
+├── frontend/                  ← (Deploy to Netlify)
+│   ├── index.html             ← Dashboard
+│   ├── scanner.html           ← Transaction Scanner
+│   ├── forensics.html         ← Graph Forensics
+│   └── js/api.js              ← API config and fetch() calls
 ├── evaluate/
 │   └── compare.py             ← XGBoost vs GNN baseline comparison
 ├── trainmodel.py              ← full training pipeline
@@ -184,16 +187,14 @@ python trainmodel.py
 ```
 Model saves to `models/gnn_model.pth` automatically.
 
-### Step 6 — Run the app (two terminals)
-Terminal 1:
+### Step 6 — Run the app
+Start the backend API server:
 ```bash
 python -m uvicorn backend.api:app --reload
 ```
-Terminal 2:
-```bash
-python -m streamlit run frontend/app.py
-```
-Open **http://localhost:8501**
+The API will be available at **http://localhost:8000**.
+
+For the frontend, simply open `frontend/index.html` in your web browser, or serve it using a local static server (e.g., `python -m http.server`). Make sure the `API` constant in `frontend/js/api.js` points to your backend URL.
 
 ---
 
