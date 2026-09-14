@@ -217,3 +217,64 @@ class GraphStore:
 
         communities.sort(key=lambda c: c["illicit_ratio"], reverse=True)
         return communities[:max_communities]
+
+    # ── Risk analysis helpers ─────────────────────────────────────
+
+    def get_node_degree(self, node_idx: int) -> int:
+        """Total number of direct connections (in + out)."""
+        return len(self.adj.get(node_idx, []))
+
+    def get_illicit_neighbor_ratio(self, node_idx: int) -> tuple[int, int, float]:
+        """
+        Returns (illicit_neighbors, total_neighbors, illicit_ratio).
+        Useful for explaining *why* a node scores high.
+        """
+        neighbors = self.adj.get(node_idx, [])
+        total = len(neighbors)
+        if total == 0:
+            return 0, 0, 0.0
+        illicit = sum(1 for nb in neighbors if int(self.labels[nb]) == 1)
+        return illicit, total, round(illicit / total, 3)
+
+    def get_community_info(self, node_idx: int) -> dict | None:
+        """
+        Check if node belongs to a cached suspicious community.
+        Returns community summary dict or None if not in any community.
+        Uses a lazy BFS from the node — does not require precomputed cache.
+        """
+        if int(self.labels[node_idx]) != 1:
+            # Only illicit-labeled nodes are checked
+            return None
+
+        illicit_set = set(
+            int(i) for i, lbl in enumerate(self.labels) if lbl == 1
+        )
+        visited: set[int] = set()
+        component: set[int] = set()
+        queue = [node_idx]
+        while queue:
+            node = queue.pop()
+            if node in visited:
+                continue
+            visited.add(node)
+            component.add(node)
+            for nb in self.adj.get(node, []):
+                if nb not in visited:
+                    queue.append(nb)
+
+        if len(component) < 3:
+            return None
+
+        illicit_count = sum(1 for n in component if n in illicit_set)
+        return {
+            "community_size":   len(component),
+            "illicit_count":    illicit_count,
+            "illicit_ratio":    round(illicit_count / len(component), 3),
+        }
+
+    def node_exists(self, tx_id: int | str) -> bool:
+        """Check whether a tx_id is in the graph without returning the index."""
+        try:
+            return int(tx_id) in self.node_to_idx
+        except (ValueError, TypeError):
+            return False

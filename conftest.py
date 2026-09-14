@@ -33,6 +33,8 @@ def load_backend_globals():
     import backend.api as api_module
     from backend.model_loader import ModelLoader
     from backend.graph_store import GraphStore
+    from backend.persistence import SessionState
+    from backend.rate_limiter import RateLimiter
 
     # Verify files exist before trying to load
     for path, label in [(MODEL_PATH, "Model weights"), (CONFIG_PATH, "Model config"), (DATA_PATH, "Processed data")]:
@@ -43,11 +45,17 @@ def load_backend_globals():
             )
 
     # Load and inject
-    api_module._loader = ModelLoader(model_path=MODEL_PATH, config_path=CONFIG_PATH)
-    api_module._store  = GraphStore(data_path=DATA_PATH)
+    api_module._loader  = ModelLoader(model_path=MODEL_PATH, config_path=CONFIG_PATH)
+    api_module._store   = GraphStore(data_path=DATA_PATH)
+    api_module._session = SessionState()
+
+    # Replace rate limiters with very high limits so tests never get 429
+    api_module._global_limiter  = RateLimiter(max_calls=10_000, window_seconds=60)
+    api_module._scoring_limiter = RateLimiter(max_calls=10_000, window_seconds=60)
 
     yield  # tests run here
 
     # Cleanup (optional — session ends anyway)
-    api_module._loader = None
-    api_module._store  = None
+    api_module._loader  = None
+    api_module._store   = None
+    api_module._session = None
