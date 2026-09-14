@@ -786,3 +786,69 @@ async def reset_stats() -> dict:
     _session.reset_stats()
     logger.info("Session stats reset by admin.")
     return {"message": "Stats reset.", "timestamp": _now_iso()}
+
+
+# ── GET /explain/{tx_id} ──────────────────────────────────────────
+@app.get("/explain/{tx_id}", tags=["Graph"],
+         dependencies=[Depends(global_rate_limit)])
+async def explain_tx(tx_id: str) -> dict:
+    """
+    Gradient x Input feature attribution for a known dataset transaction.
+
+    Returns which of the three Elliptic feature groups drove the GNN's
+    illicit prediction, and the top 5 features pushing toward each class.
+
+    Only available for transactions in the Elliptic dataset (known nodes).
+    For synthetic transactions use /score_transaction risk_factors instead.
+    """
+    require_backend()
+
+    try:
+        node_idx = _store.get_node_idx(tx_id)
+    except (ValueError, TypeError):
+        raise HTTPException(422, f"tx_id must be a numeric Elliptic transaction ID, got '{tx_id}'.")
+
+    if node_idx is None:
+        raise HTTPException(
+            404,
+            f"tx_id '{tx_id}' not found in the dataset. "
+            "Explainability is only available for known Elliptic transactions."
+        )
+
+    # Extract 2-hop subgraph for graph context
+    sub_feat, sub_ei, sub_nodes = _store.get_subgraph(node_idx, hops=2)
+    local_idx = sub_nodes.index(node_idx)
+
+    # Get GNN risk score
+    probs     = _loader.predict_full_graph(sub_feat, sub_ei)
+    risk_score = float(probs[local_idx, 1])
+    verdict, zone = _verdict_and_zone(risk_score)
+
+    # Gradient x Input attribution
+    explanation = _loader.explain_prediction(sub_feat, sub_ei, node_idx=local_idx)
+
+    ill_nb, tot_nb, ill_ratio = _store.get_illicit_neighbor_ratio(node_idx)
+
+    return {
+        "tx_id":               tx_id,
+        "label":               _store.get_node_label(node_idx),
+        "risk_score":          round(risk_score, 4),
+        "risk_percent":        int(round(risk_score * 100)),
+        "verdict":             verdict,
+        "zone":                zone,
+        "explanation":         explanation,
+        "neighbor_context": {
+            "subgraph_size":          len(sub_nodes),
+            "illicit_neighbors":      ill_nb,
+            "total_neighbors":        tot_nb,
+            "illicit_neighbor_ratio": ill_ratio,
+        },
+        "interpretation": (
+            f"The GNN scored this transaction {int(round(risk_score*100))}% illicit. "
+            f"The dominant driver was '{explanation['dominant_group']}' "
+            f"({explanation['feature_group_importance'][explanation['dominant_group']]*100:.0f}% of attribution). "
+            f"{'Network features dominating means the transaction looks suspicious because of WHO it connects to, not just what it looks like alone.' if explanation['dominant_group'] == 'network_features' else 'Local features dominating means the transaction-level statistics (volume, fee structure) are the primary red flag.'}"
+        ),
+        "timestamp":  _now_iso(),
+    }
+

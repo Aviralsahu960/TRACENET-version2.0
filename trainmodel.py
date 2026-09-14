@@ -285,8 +285,8 @@ config = {
 with open('models/model_config.json', 'w') as f:
     json.dump(config, f, indent=2)
 
-print("\n✅ Model saved to models/gnn_model.pth")
-print("✅ Config saved to models/model_config.json")
+print("\n[DONE] Model saved to models/gnn_model.pth")
+print("[DONE] Config saved to models/model_config.json")
 print("\nFinal metrics saved:")
 print(f"  Accuracy:  {config['accuracy']}%")
 print(f"  Precision: {config['precision_illicit']}%")
