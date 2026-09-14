@@ -230,17 +230,17 @@ def _risk_factors(
     # Structuring — classic AML pattern
     if 8_000 <= amount < 10_000:
         factors.append(
-            f"Amount ${amount:,.0f} — just below \\$10,000 reporting threshold "
+            f"Amount ${amount:,.0f} — just below $10,000 reporting threshold "
             f"(possible structuring / smurfing)"
         )
     elif amount >= 500_000:
-        factors.append(f"Very large transfer (\\${amount:,.0f}) — enhanced due diligence required")
+        factors.append(f"Very large transfer (${amount:,.0f}) — enhanced due diligence required")
     elif amount >= 100_000:
-        factors.append(f"Large transfer (\\${amount:,.0f}) — above standard monitoring threshold")
+        factors.append(f"Large transfer (${amount:,.0f}) — above standard monitoring threshold")
 
     # Round amounts are a structuring signal
     if amount > 1_000 and amount == int(amount) and amount % 1000 == 0:
-        factors.append(f"Round amount (\\${amount:,.0f}) — possible structuring signal")
+        factors.append(f"Round amount (${amount:,.0f}) — possible structuring signal")
 
     # Network context
     if total_neighbors > 0:
@@ -746,7 +746,7 @@ async def communities(min_size: int = 3) -> dict:
 # ── GET /lookup/{tx_id} ───────────────────────────────────────────
 @app.get("/lookup/{tx_id}", tags=["Graph"],
          dependencies=[Depends(global_rate_limit)])
-async def lookup_tx(tx_id: str, hops: int = 2) -> dict:
+async def lookup_tx(tx_id: str) -> dict:
     """
     Check if a transaction ID exists in the Elliptic dataset.
     Useful for the frontend to decide whether to show 'View in Graph' button.
