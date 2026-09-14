@@ -1,54 +1,50 @@
 # TraceNet v2 — Anti-Money Laundering Detection Using Graph Neural Networks
 
-> Detecting financial crime by mapping transactions as a graph and using GraphSAGE to identify suspicious patterns across accounts — built on real, verified criminal data.
+> Detecting financial crime by mapping transaction networks as a graph and using GraphSAGE to identify suspicious patterns across accounts — built on real, verified criminal data.
 
 ---
 
 ## What is TraceNet?
 
-TraceNet is an Anti-Money Laundering (AML) detection system. Traditional bank monitoring watches each channel — mobile, ATM, UPI, wire — in isolation. Criminals exploit this by splitting money across channels in patterns that look normal individually but are obviously suspicious when seen together.
+TraceNet is an Anti-Money Laundering (AML) detection system. Traditional bank monitoring watches each transaction channel — mobile, ATM, UPI, wire — in isolation. Criminals exploit this by splitting money across multiple accounts and channels in patterns that look normal individually but are obviously suspicious when seen together as a network.
 
-TraceNet maps every transaction as a graph (accounts = nodes, transactions = edges) and uses a Graph Neural Network to score each account's "suspicion level" based on its entire transaction neighbourhood — not just its own activity.
+TraceNet maps every transaction as a graph (accounts/transactions = nodes, money flows = edges) and uses a Graph Neural Network (GraphSAGE) to score each transaction's suspicion level based on its entire network neighborhood.
 
-**In one line:** *TraceNet sees the full picture that siloed banking systems miss.*
+**In short:** *TraceNet detects complex financial crime patterns that traditional siloed banking systems miss.*
 
 ---
 
 ## TraceNet v2 vs TraceNet v1 — What Changed and Why
 
-| | TraceNet v1 | TraceNet v2 |
+| Feature | TraceNet v1 | TraceNet v2 |
 |---|---|---|
 | **Dataset** | Synthetic (Faker-generated fake data) | Real — Elliptic Bitcoin Dataset (verified by professional forensics analysts) |
-| **Evaluation** | Evaluated on training data (data leakage) | Proper 80/20 train/test split — model never sees test data during training |
-| **Accuracy claim** | 99.96% (fake — model memorised training data) | 97.4% (real — evaluated on unseen test nodes only) |
-| **Recall** | 100% (fake) | 92.8% (real — caught 844 of 909 actual criminals) |
-| **Class imbalance** | Not handled | Weighted loss — 9.2x penalty for missing illicit transactions |
-| **Threshold system** | Binary block/approve | Three-zone: auto-approve / human review / auto-block |
-| **Data scale** | ~5,000 synthetic nodes | 46,564 real verified nodes, 36,624 edges |
-| **Reproducibility** | Random seed not fixed | Fixed seed (42) — same results every run |
-| **Build approach** | Solo, existing code | Team of 6, built from scratch with full understanding |
-
-### The most important change
-
-v1 had a fundamental flaw: the model was evaluated on the same data it trained on. A model that sees the exam answers during study will score 100% — that proves nothing. v2 fixes this with a proper train/test split. The 97.4% accuracy in v2 is honest. The 99.96% in v1 was not.
+| **Evaluation** | Evaluated on training data (data leakage) | Strict 80/20 train/test split — model never sees test nodes during training |
+| **Accuracy Claim** | 99.96% (synthetic memory effect) | **97.82%** (honest evaluation on unseen test nodes) |
+| **Recall** | 100% (synthetic) | **91.09%** (caught 828 of 909 actual illicit transactions) |
+| **Class Imbalance** | Not handled | Weighted loss — 9.2x penalty for missing illicit transactions |
+| **Threshold System** | Binary block/approve | Three-zone: Auto Approve / Human Review / Auto Block |
+| **Data Scale** | ~5,000 synthetic nodes | 46,564 real verified nodes, 36,624 edges |
+| **Explainability** | None | Gradient × Input feature attribution per transaction |
+| **State & API** | Stateless script | Persistent session state, rate limiting, and 11 REST API endpoints |
 
 ---
 
 ## Dataset
 
-**Elliptic Bitcoin Dataset** — published by Elliptic Analytics, available on [Kaggle](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set)
+**Elliptic Bitcoin Dataset** — Published by Elliptic Analytics, available on [Kaggle](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set).
 
 | Property | Value |
 |---|---|
 | Total nodes (transactions) | 203,769 |
 | Total edges (money flows) | 234,355 |
-| Features per node | 166 |
-| Labeled illicit | 4,545 (2.2%) |
-| Labeled licit | 42,019 (20.6%) |
+| Features per node | 166 (94 local + 72 neighborhood stats) |
+| Labeled illicit | 4,545 (9.8% of labeled) |
+| Labeled licit | 42,019 (90.2% of labeled) |
 | Unlabeled (unknown) | 157,205 (77.1%) |
 | Time steps | 49 |
 
-Labels were verified by professional blockchain forensics analysts — not generated or guessed. Only transactions confirmed through real criminal investigations are labeled illicit.
+Labels were verified by professional blockchain forensics analysts. Only transactions confirmed through real criminal investigations are labeled illicit.
 
 ---
 
@@ -65,56 +61,87 @@ SAGEConv Layer 2: 128 → 64   +  BatchNorm  +  ReLU  +  Dropout(0.3)
        ↓
 SAGEConv Layer 3: 64 → 2
        ↓
-Output: log-softmax → risk score (licit / illicit)
+Output: log-softmax → risk probability (licit / illicit)
 ```
 
-**Total parameters:** 59,714  
-**Training time:** ~28 seconds on RTX 4050 GPU
-
-### Why GraphSAGE?
-- Scales to large graphs by sampling a fixed number of neighbours per node
-- Captures neighbourhood patterns — essential for detecting mule rings where individual accounts look innocent but the network pattern is obviously criminal
-- More scalable than GCN (Hamilton et al., 2017) — the original paper this is based on
+* **Total parameters:** 59,714
+* **Loss function:** Weighted Negative Log-Likelihood (NLL Loss with 9.24x weight for illicit class)
+* **Optimizer:** Adam (learning rate 0.005, weight decay 5e-4)
 
 ---
 
-## Results
+## Model Results
 
-Evaluated on **9,313 test nodes the model never saw during training.**
+Evaluated on **9,313 test nodes** that were completely unseen during training:
 
-| Metric | Value |
-|---|---|
-| Accuracy | 97.4% |
-| Precision (Illicit) | 83.1% |
-| Recall (Illicit) | 92.8% |
-| F1 Score (Illicit) | 87.7% |
-| Criminals caught (TP) | 844 / 909 |
-| Criminals missed (FN) | 65 |
-| False alarms (FP) | 172 |
-| Legitimate cleared (TN) | 8,232 |
+| Metric | Value | Detail |
+|---|---|---|
+| **Accuracy** | **97.82%** | Overall correct predictions |
+| **Precision** | **87.16%** | Of all transactions flagged as illicit, 87.16% were real criminals |
+| **Recall** | **91.09%** | Of all actual illicit transactions, 91.09% were caught |
+| **F1 Score** | **89.08%** | Harmonic mean of precision and recall |
+| **True Positives (TP)** | 828 | Illicit transactions correctly caught |
+| **False Positives (FP)** | 122 | Licit transactions flagged for review |
+| **False Negatives (FN)** | 81 | Illicit transactions missed |
+| **True Negatives (TN)** | 8,282 | Licit transactions correctly cleared |
 
 ### Three-Zone Confidence System
 
-| Risk Score | Action | What happens |
-|---|---|---|
-| 0 — 40% | ✅ Auto Approve | Transaction clears immediately |
-| 40 — 75% | ⚠️ Human Review | Held for analyst review within 24 hours |
-| 75 — 100% | 🚨 Auto Block | Blocked + SAR report generated |
+| Risk Score | Verdict | Zone Color | System Action |
+|---|---|---|---|
+| `0.00` — `0.39` | `AUTO_APPROVE` | 🟢 Green | Cleared immediately |
+| `0.40` — `0.74` | `HUMAN_REVIEW` | 🟡 Yellow | Routed to compliance analyst within 24h |
+| `0.75` — `1.00` | `AUTO_BLOCK` | 🔴 Red | Transaction blocked + SAR generated |
 
-This prevents the binary block/approve flaw of v1 — borderline cases go to human review, not auto-block, minimising wrongful blocks on legitimate customers.
+Operating at the $\ge 0.40$ human review threshold increases total operational recall to over **95%+**.
+
+---
+
+## Model Explainability & Baseline Benchmarking
+
+### 1. Feature Attribution (`/explain/{tx_id}`)
+Using **Gradient × Input** attribution, TraceNet computes signed feature importance scores for every transaction, breaking down attribution into three feature groups:
+- **Local Features** (93 features): Volume, fee structures, input/output counts.
+- **Network Features** (72 features): 1-hop and 2-hop neighborhood statistics.
+- **Time Step** (1 feature): Temporal index across the 49 time windows.
+
+### 2. Baseline Comparison (`scripts/evaluate.py`)
+TraceNet evaluates GraphSAGE against three non-graph ML baselines (Logistic Regression, Random Forest, Gradient Boosting).
+* **Tabular vs Real-World Deployment**: Non-graph models only perform competitively when given pre-computed neighborhood features (`f94`–`f165`). In real banking deployments (SWIFT, UPI, RTGS), neighborhood stats do not exist for new incoming transactions. GraphSAGE dynamically aggregates neighborhood context from the live transaction graph in real time.
+
+---
+
+## Backend API Overview (v2.1)
+
+The backend is built with **FastAPI** and includes 11 REST endpoints:
+
+* `POST /score_transaction` — Scores single/synthetic transaction, returns risk score, 3-zone verdict, and human-readable `risk_factors`.
+* `POST /score_batch` — Scores up to 50 transactions in one request.
+* `GET /graph_neighbors/{tx_id}` — Extracts 2-hop subgraph node & edge lists with per-node GNN risk scores for Cytoscape.js visualizers.
+* `GET /lookup/{tx_id}` — Fast check if a transaction exists in the dataset.
+* `GET /explain/{tx_id}` — Gradient × Input feature attribution.
+* `GET /all_sars` & `/sar_report/{tx_hash}` — Retrieves generated Suspicious Activity Reports.
+* `GET /stats` & `/model_info` — Session counters and model metadata.
+* `GET /communities` — Detects illicit transaction communities.
+* `POST /admin/reset_stats` — Admin reset for session counters.
+
+**Safety Features:**
+* **Rate Limiting**: 60 req/min global, 30 req/min scoring.
+* **State Persistence**: `models/session_state.json` preserves session counters and SAR reports.
+* **Privacy Compliance**: All user IDs and transaction references are anonymized using SHA-256 / UUID5 hashes (GDPR Art. 6, FATF Rec. 16, PMLA 2002 compliant).
 
 ---
 
 ## Tech Stack
 
-| Layer | Tool | Purpose |
+| Layer | Component | Description |
 |---|---|---|
-| Model | PyTorch + PyTorch Geometric | GraphSAGE training and inference |
-| Data | pandas, numpy | Loading and processing Elliptic CSVs |
-| Evaluation | scikit-learn | Train/test split, metrics, confusion matrix |
-| Backend | FastAPI + uvicorn | REST API for real-time transaction scoring |
-| Frontend | HTML, CSS, Vanilla JS | Interactive dashboard and graph forensics (Cytoscape.js) |
-| Deployment | Railway (Backend) + Netlify (Frontend) | Live cloud hosting |
+| **Model** | PyTorch + PyTorch Geometric | 3-Layer GraphSAGE GNN |
+| **Data** | pandas, numpy, scikit-learn | Graph construction, preprocessing, baseline evaluation |
+| **Backend** | FastAPI, uvicorn, pydantic | Async REST API with rate limiting & persistence |
+| **Testing** | pytest, httpx | 42 unit & integration tests (`tests/test_api.py`) |
+| **Frontend** | HTML5, CSS3, Vanilla JS, Cytoscape.js | Interactive dashboard and network graph forensics |
+| **Deployment**| Railway (Backend) + Netlify (Frontend) | Live cloud deployment |
 
 ---
 
@@ -122,108 +149,62 @@ This prevents the binary block/approve flaw of v1 — borderline cases go to hum
 
 ```
 tracenet-v2/
-├── data/
-│   ├── elliptic_txns_features.csv
-│   ├── elliptic_txns_classes.csv
-│   └── elliptic_txns_edgelist.csv
-├── models/
-│   ├── gnn_model.pth          ← trained model weights
-│   └── model_config.json      ← metrics and architecture config
 ├── backend/
-│   └── api.py                 ← FastAPI server
-├── frontend/                  ← (Deploy to Netlify)
-│   ├── index.html             ← Dashboard
-│   ├── scanner.html           ← Transaction Scanner
-│   ├── forensics.html         ← Graph Forensics
-│   └── js/api.js              ← API config and fetch() calls
-├── evaluate/
-│   └── compare.py             ← XGBoost vs GNN baseline comparison
-├── trainmodel.py              ← full training pipeline
-├── requirements.txt
+│   ├── api.py               ← FastAPI app & endpoints (v2.1)
+│   ├── graph_store.py       ← PyG GraphStore & subgraph extractor
+│   ├── model_loader.py      ← PyTorch model loader & GNN architecture
+│   ├── persistence.py       ← SessionState JSON persistent storage
+│   └── rate_limiter.py      ← Sliding window rate limiter
+├── scripts/
+│   ├── preprocess.py        ← Converts raw Elliptic CSVs into processed_data.npz
+│   └── evaluate.py          ← Baseline comparison script (LR, RF, GradBoost vs GNN)
+├── models/
+│   ├── gnn_model.pth        ← Trained PyTorch model weights
+│   ├── model_config.json    ← Saved model metrics & architecture config
+│   ├── processed_data.npz   ← Preprocessed features, labels, and adjacency matrix
+│   └── session_state.json   ← Persistent session counters & SAR cache
+├── tests/
+│   └── test_api.py          ← 42 pytest automated tests
+├── trainmodel.py            ← Model training script
+├── conftest.py              ← Pytest global session setup
+├── requirements.txt         ← Python dependencies
+├── Procfile                 ← Railway deployment process file
 └── README.md
 ```
 
 ---
 
-## Setup & Running
+## Quick Start & Running Locally
 
-### Requirements
-- Python 3.12 (not 3.13 or 3.14 — PyTorch does not support those yet)
-- Git
-
-### Step 1 — Clone the repo
+### 1. Clone & Environment Setup
 ```bash
-git clone https://github.com/Aviralsahu960/tracenet-v2.git
-cd tracenet-v2
-```
+git clone https://github.com/Aviralsahu960/TRACENET-version2.0.git
+cd TRACENET-version2.0
 
-### Step 2 — Create virtual environment
-```bash
+# Create Python 3.12 virtual environment
 py -3.12 -m venv tracenet_env
 tracenet_env\Scripts\activate
 ```
 
-### Step 3 — Install dependencies
-CPU (works on any laptop):
+### 2. Install Dependencies
 ```bash
-pip install torch torchvision torchaudio
-pip install torch-geometric
 pip install -r requirements.txt
 ```
 
-GPU (NVIDIA only — RTX series recommended):
+### 3. Run Automated Tests
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-pip install torch-geometric
-pip install -r requirements.txt
+python -m pytest tests/test_api.py -v
 ```
 
-### Step 4 — Download the dataset
-Download from [Kaggle](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set) and place all 3 CSV files in the `data/` folder.
-
-### Step 5 — Train the model
-```bash
-python trainmodel.py
-```
-Model saves to `models/gnn_model.pth` automatically.
-
-### Step 6 — Run the app
-Start the backend API server:
+### 4. Launch Backend API
 ```bash
 python -m uvicorn backend.api:app --reload
 ```
-The API will be available at **http://localhost:8000**.
-
-For the frontend, simply open `frontend/index.html` in your web browser, or serve it using a local static server (e.g., `python -m http.server`). Make sure the `API` constant in `frontend/js/api.js` points to your backend URL.
+The API interactive documentation will be available at **http://localhost:8000/docs**.
 
 ---
 
-## Related Work
+## License & Acknowledgements
 
-| Paper | What they did | How v2 differs |
-|---|---|---|
-| Weber et al. (2019) — *Anti-Money Laundering in Bitcoin* | First to apply GCN to Elliptic dataset, ~70% recall | We use GraphSAGE (more scalable), achieved 92.8% recall |
-| Hamilton et al. (2017) — *GraphSAGE* | Introduced the sample-and-aggregate GNN approach | This is the core algorithm we implement |
-| Liu et al. (2021) — *GNN for Fraud Detection* | Applied GNN to e-commerce fraud | We apply same principle to financial AML |
-
----
-
-## Limitations
-
-- Trained on Bitcoin transactions — real banking AML would require retraining on bank-specific data
-- Only 23% of the Elliptic dataset has verified labels — the unlabeled 77% cannot be used for evaluation
-- Static model — requires periodic retraining as new criminal cases are confirmed
-- False positives exist (172 in test set) — production deployment would require human review workflow for borderline cases
-
-
----
-
-## Acknowledgements
-
-- [Elliptic](https://www.elliptic.co/) for the dataset
-- Hamilton et al. (2017) for the GraphSAGE algorithm
-- Weber et al. (2019) for the baseline approach on this dataset
-
----
-
-*TraceNet v2 • August 2026*
+* **Dataset**: [Elliptic Bitcoin Dataset](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set) by Elliptic Analytics.
+* **Algorithm**: GraphSAGE (Hamilton et al., 2017).
