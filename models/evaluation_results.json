@@ -1,0 +1,51 @@
+{
+  "baselines": [
+    {
+      "label": "Logistic Regression",
+      "accuracy": 88.0,
+      "precision": 44.5,
+      "recall": 93.07,
+      "f1": 60.21,
+      "tp": 846,
+      "fp": 1055,
+      "fn": 63,
+      "tn": 7349
+    },
+    {
+      "label": "Random Forest",
+      "accuracy": 98.99,
+      "precision": 98.8,
+      "recall": 90.76,
+      "f1": 94.61,
+      "tp": 825,
+      "fp": 10,
+      "fn": 84,
+      "tn": 8394
+    },
+    {
+      "label": "Gradient Boosting",
+      "accuracy": 98.89,
+      "precision": 93.8,
+      "recall": 94.94,
+      "f1": 94.37,
+      "tp": 863,
+      "fp": 57,
+      "fn": 46,
+      "tn": 8347
+    }
+  ],
+  "gnn": {
+    "label": "GraphSAGE GNN",
+    "accuracy": 97.82,
+    "precision": 87.16,
+    "recall": 91.09,
+    "f1": 89.08,
+    "tp": 828,
+    "fp": 122,
+    "fn": 81,
+    "tn": 8282
+  },
+  "dataset": "Elliptic Bitcoin Dataset",
+  "test_size": 9313,
+  "train_size": 37251
+}
