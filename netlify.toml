@@ -1,0 +1,7 @@
+[build]
+  publish = "TraceNet_Frontend"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>TraceNet v2 — AML Forensic Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">⬡</div>
+        <div>
+          <div class="brand-name">TRACENET</div>
+          <div class="brand-sub">AML · GNN Forensics · v2.1</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-page="dashboard" title="Network Overview & Live Feeds">
+          <span class="nav-icon">⌂</span><span class="nav-label">Dashboard</span>
+        </button>
+        <button class="nav-item" data-page="analysis" title="Score Transactions with GNN">
+          <span class="nav-icon">↗</span><span class="nav-label">Transaction Analysis</span>
+        </button>
+        <button class="nav-item" data-page="graph" title="Explore Transaction Networks & Clusters">
+          <span class="nav-icon">⬡</span><span class="nav-label">Graph Explorer</span>
+        </button>
+        <button class="nav-item" data-page="alerts" title="Review Suspicious Activity Reports">
+          <span class="nav-icon">⚠</span><span class="nav-label">Alerts &amp; SARs</span>
+          <b id="sar-count-badge" class="nav-badge"></b>
+        </button>
+        <button class="nav-item" data-page="model" title="GraphSAGE Architecture & Metrics">
+          <span class="nav-icon">▥</span><span class="nav-label">Model Insights</span>
+        </button>
+        <button class="nav-item" data-page="reports" title="Export Compliance Dossiers">
+          <span class="nav-icon">▤</span><span class="nav-label">Reports &amp; Sharing</span>
+        </button>
+      </nav>
+
+      <div class="side-footer">
+        <div class="brand-mark" style="font-size:18px;flex-shrink:0">⬡</div>
+        <div style="min-width:0;flex:1">
+          <div style="font-size:10px;font-weight:600;color:#d9e0e3">GraphSAGE GNN</div>
+          <div id="backend-label" style="font-size:9px;color:var(--muted)">Local Model Online</div>
+        </div>
+        <div id="backend-status" class="status-dot online" title="Backend Status"></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section id="page" class="page"></section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Reusable Inspection & SAR Modal -->
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()" title="Close">✕</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="app.js?v=6"></script>
+</body>
+</html>

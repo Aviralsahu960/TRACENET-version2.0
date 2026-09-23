@@ -499,7 +499,7 @@ async def score_transaction(req: TransactionRequest) -> dict:
         # Neighbor quality metrics
         ill_nb, tot_nb, ill_ratio = _store.get_illicit_neighbor_ratio(node_idx)
         node_degree = _store.get_node_degree(node_idx)
-
+        risk_score = float(np.clip(illicit_p, 0.0, 1.0))
     else:
         # ── Mode 2: synthetic transaction ─────────────────────────
         channel_risk = _CHANNEL_BASE_RISK.get(req.channel, 0.25)
@@ -522,7 +522,21 @@ async def score_transaction(req: TransactionRequest) -> dict:
         ill_nb, tot_nb, ill_ratio = 0, 0, 0.0
         node_degree = 0
 
-    risk_score   = float(np.clip(illicit_p, 0.0, 1.0))
+        # For synthetic transactions without graph history:
+        # High amounts, structuring signals, and high-risk channels properly escalate risk
+        if req.amount >= 5_000_000:
+            synthetic_risk = float(np.clip(max(base_risk, 0.88), 0.0, 1.0))
+        elif req.amount >= 500_000:
+            synthetic_risk = float(np.clip(max(base_risk, 0.78), 0.0, 1.0))
+        elif req.amount >= 100_000:
+            synthetic_risk = float(np.clip(max(base_risk, 0.55), 0.0, 1.0))
+        elif 8_000 <= req.amount < 10_000 and req.channel in {"wire", "crypto", "cash"}:
+            synthetic_risk = float(np.clip(max(base_risk, 0.76), 0.0, 1.0))
+        else:
+            synthetic_risk = float(np.clip(0.65 * base_risk + 0.35 * illicit_p, 0.0, 1.0))
+
+        risk_score = synthetic_risk
+
     risk_percent = int(round(risk_score * 100))
     verdict, zone = _verdict_and_zone(risk_score)
 
