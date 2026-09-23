@@ -11,6 +11,7 @@ scikit-learn
 fastapi
 uvicorn[standard]
 python-multipart
+pydantic>=2.0.0
 
 # Evaluation
 xgboost

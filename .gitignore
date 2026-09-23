@@ -17,6 +17,8 @@ __pycache__/
 #   models/gnn_model.pth         ← trained weights (241 KB) ✅ committed
 #   models/model_config.json     ← metrics config (445 B)   ✅ committed
 #   models/processed_data.npz    ← preprocessed graph data  ✅ committed
+# Runtime session state cache
+models/session_state.json
 
 # IDE
 .vscode/
