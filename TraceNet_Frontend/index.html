@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#02050a">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -10,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
   <div class="app">
@@ -54,6 +58,18 @@
         <div id="backend-status" class="status-dot online" title="Backend Status"></div>
       </div>
     </aside>
+      <!-- Mobile-only top header bar -->
+      <div class="mobile-topbar">
+        <div class="mobile-brand">
+          <span style="color:var(--cyan);font-size:18px">⬡</span>
+          <span style="font-weight:800;letter-spacing:2px;font-size:14px;color:#fff">TRACENET</span>
+          <span style="font-size:9px;color:var(--muted);margin-left:4px">AML v2.1</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="backend-status-mobile" class="status-dot online"></div>
+          <span id="backend-label-mobile" style="font-size:9px;color:var(--muted)">Connecting…</span>
+        </div>
+      </div>
 
     <main class="main">
       <section id="page" class="page"></section>
@@ -70,6 +86,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

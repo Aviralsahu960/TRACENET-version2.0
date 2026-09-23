@@ -365,16 +365,23 @@ let _communitiesData = null;
 // =============================================================================
 async function refreshBackendStatus() {
   _healthData = await api('/health');
-  const dot = $id('backend-status');
-  const lbl = $id('backend-label');
+  const dot    = $id('backend-status');
+  const lbl    = $id('backend-label');
+  const dotM   = $id('backend-status-mobile');
+  const lblM   = $id('backend-label-mobile');
   if (_healthData && _healthData.status === 'ok') {
-    if (dot) dot.className = 'status-dot online';
+    if (dot)  dot.className  = 'status-dot online';
+    if (dotM) dotM.className = 'status-dot online';
     const isCloud = API_BASE.includes('railway') || !isLocalhost;
     const acc = _healthData.accuracy ? _healthData.accuracy.toFixed(1) : '97.6';
-    if (lbl) lbl.textContent = isCloud ? `Railway Cloud Active (${acc}%)` : `Local GNN Active (${acc}%)`;
+    const statusText = isCloud ? `Railway Active (${acc}%)` : `Local GNN (${acc}%)`;
+    if (lbl)  lbl.textContent  = isCloud ? `Railway Cloud Active (${acc}%)` : `Local GNN Active (${acc}%)`;
+    if (lblM) lblM.textContent = statusText;
   } else {
-    if (dot) dot.className = 'status-dot offline';
-    if (lbl) lbl.textContent = 'Backend Offline';
+    if (dot)  dot.className  = 'status-dot offline';
+    if (dotM) dotM.className = 'status-dot offline';
+    if (lbl)  lbl.textContent  = 'Backend Offline';
+    if (lblM) lblM.textContent = 'Offline';
   }
   return _healthData;
 }

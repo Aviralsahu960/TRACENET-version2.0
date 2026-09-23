@@ -347,14 +347,281 @@ textarea.form-input{height:auto;padding:10px 12px;resize:vertical;min-height:80p
 .toast.ok{background:#0e2823;color:#2dd4bf;border:1px solid rgba(45,212,191,.4);box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .toast.err{background:#280a12;color:#ff4f6a;border:1px solid rgba(255,79,106,.4);box-shadow:0 10px 30px rgba(0,0,0,.5)}
 
-/* ───── Responsive ───── */
-@media(max-width:1250px){.kpis{grid-template-columns:repeat(2,1fr)}.graph-split{grid-template-columns:1fr}}
-@media(max-width:900px){.form-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:repeat(2,1fr)}.sys-banner{flex-direction:column;align-items:flex-start}}
-@media(max-width:700px){
-  .sidebar{width:60px}
-  .nav-label,.brand>div:not(.brand-mark),.side-footer>div,.brand-sub{display:none}
-  .nav-item{justify-content:center;padding:12px}
-  .nav-icon{font-size:18px}
-  .page{padding:16px 14px 40px}
-  .kpis{grid-template-columns:1fr}
+/* ───── Mobile Top-Bar (hidden on desktop, shown on mobile) ───── */
+.mobile-topbar {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  background: rgba(5, 8, 15, 0.97);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 99;
 }
+.mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN — TABLET + MOBILE
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Tablet: 1250px ── */
+@media (max-width: 1250px) {
+  .kpis { grid-template-columns: repeat(2, 1fr) }
+  .graph-split { grid-template-columns: 1fr }
+}
+
+/* ── Small Tablet: 900px ── */
+@media (max-width: 900px) {
+  .form-grid { grid-template-columns: 1fr }
+  .stats-row { grid-template-columns: repeat(2, 1fr) }
+  .sys-banner { flex-direction: column; align-items: flex-start; gap: 10px }
+  .sys-chips { flex-wrap: wrap; gap: 6px }
+  .page-head { flex-direction: column; gap: 10px }
+  .page-actions { flex-wrap: wrap }
+  .g-3 { grid-template-columns: repeat(2, 1fr) }
+  .graph-canvas { height: 480px }
+}
+
+/* ── Mobile: 640px — full responsive overhaul ── */
+@media (max-width: 640px) {
+
+  /* ─ Remove desktop sidebar, use bottom nav instead ─ */
+  .sidebar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    top: auto;
+    width: 100% !important;
+    height: 62px;
+    flex-direction: row;
+    align-items: stretch;
+    border-right: none;
+    border-top: 1px solid var(--line);
+    padding: 0;
+    z-index: 100;
+    background: rgba(5, 8, 15, 0.97);
+    backdrop-filter: blur(20px);
+    overflow: visible;
+  }
+
+  /* Hide brand + footer in mobile bottom nav */
+  .brand,
+  .side-footer { display: none !important }
+
+  /* Nav becomes horizontal row */
+  .nav {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: stretch;
+    padding: 0;
+    gap: 0;
+    flex: 1;
+    overflow: visible;
+  }
+
+  .nav-item {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 4px 6px;
+    border-radius: 0;
+    border: none;
+    border-top: 2px solid transparent;
+    font-size: 9px;
+    color: #5a6e78;
+    box-shadow: none !important;
+    background: transparent !important;
+    position: relative;
+    min-width: 0;
+  }
+
+  .nav-item.active {
+    border-top-color: var(--cyan);
+    color: var(--cyan) !important;
+    background: transparent !important;
+  }
+
+  .nav-item.active .nav-icon { color: var(--cyan) }
+
+  /* Show labels on bottom nav (short labels via title attr) */
+  .nav-label {
+    display: block !important;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 52px;
+    text-align: center;
+  }
+
+  .nav-icon { font-size: 17px; width: auto }
+
+  /* SAR badge inside bottom nav */
+  .nav-badge {
+    position: absolute;
+    top: 6px; right: 50%;
+    transform: translateX(calc(50% + 6px));
+    font-size: 8px; min-width: 15px; height: 15px;
+  }
+
+  /* ─ Show mobile topbar ─ */
+  .mobile-topbar { display: flex }
+
+  /* ─ Main content pushes up above bottom nav & below topbar ─ */
+  .app {
+    flex-direction: column;
+    padding-bottom: 62px;
+    padding-top: 48px;  /* height of mobile-topbar */
+  }
+
+  .main { width: 100%; min-height: calc(100vh - 110px) }
+
+  /* ─ Page padding ─ */
+  .page { padding: 14px 12px 24px }
+
+  /* ─ All grids single column ─ */
+  .kpis,
+  .g-3,
+  .g-2,
+  .g-auto,
+  .grid { grid-template-columns: 1fr !important }
+
+  .span2 { grid-column: span 1 !important }
+  .wide   { grid-column: 1 / -1 }
+
+  /* ─ KPI cards compact ─ */
+  .kpi { min-height: 90px; padding: 14px }
+  .kpi-value { font-size: 22px; margin: 4px 0 2px }
+  .kpi-label { font-size: 10px }
+
+  /* ─ Page header stacked ─ */
+  .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .page-title { font-size: 17px }
+  .page-desc  { font-size: 10px }
+  .page-actions { flex-wrap: wrap; gap: 6px; width: 100% }
+  .page-actions .btn { flex: 1; min-width: 0; justify-content: center }
+
+  /* ─ System banner compact ─ */
+  .sys-banner {
+    padding: 10px 12px;
+    gap: 8px;
+    flex-direction: column;
+  }
+  .sys-title { font-size: 10px; letter-spacing: 0 }
+  .sys-sub   { font-size: 9px }
+  .sys-chips { gap: 5px }
+  .sys-chip  { font-size: 8px; padding: 2px 7px }
+
+  /* ─ Cards ─ */
+  .card { padding: 14px }
+  .card-title { font-size: 11px }
+
+  /* ─ Tables: horizontal scroll ─ */
+  .card:has(.table),
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table { min-width: 520px }
+
+  /* ─ Forms ─ */
+  .form-grid { grid-template-columns: 1fr }
+  .form-input { height: 42px; font-size: 13px }
+  .btn-lg { height: 44px; font-size: 12px; width: 100% }
+  .btn-primary.full-mobile { width: 100%; justify-content: center }
+
+  /* ─ Scenario pills wrap ─ */
+  .scenario-bar { flex-wrap: wrap; gap: 6px }
+  .pill { font-size: 9px; padding: 5px 10px }
+
+  /* ─ Graph canvas ─ */
+  .graph-canvas { height: 340px }
+  .graph-split  { grid-template-columns: 1fr }
+  .graph-toolbar {
+    padding: 8px 10px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .graph-legend { padding: 8px 10px; gap: 10px }
+  .graph-btn { width: 38px; height: 38px }
+
+  /* ─ Risk gauge ─ */
+  .risk-pct { font-size: 22px; min-width: 56px }
+  .verdict-title { font-size: 13px }
+  .result-meta { gap: 8px }
+  .result-card { padding: 14px }
+  .factors-list li { font-size: 10px; padding: 7px 10px }
+
+  /* ─ Stats row ─ */
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px }
+  .stat-n { font-size: 18px }
+
+  /* ─ SAR cards ─ */
+  .sar-card { padding: 12px }
+  .sar-id   { font-size: 11px }
+
+  /* ─ Modal: full-screen on phone ─ */
+  .modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 94vh;
+    border-radius: 16px 16px 0 0;
+    padding: 20px 16px 28px;
+    margin-top: auto;
+    align-self: flex-end;
+  }
+  .modal-overlay {
+    align-items: flex-end !important;
+  }
+  .sar-narrative {
+    font-size: 10px;
+    padding: 12px;
+    line-height: 1.6;
+  }
+
+  /* ─ Toast position ─ */
+  .toast {
+    right: 10px;
+    left: 10px;
+    bottom: 72px; /* above bottom nav */
+    max-width: none;
+  }
+
+  /* ─ KV list ─ */
+  .kv-row { font-size: 10px; padding: 7px 0 }
+
+  /* ─ Graph tab buttons ─ */
+  .graph-tabs { flex-wrap: wrap; gap: 6px }
+  .tab-btn { font-size: 10px; padding: 7px 12px }
+
+  /* ─ Progress bars ─ */
+  .progress-bar { height: 5px }
+
+  /* ─ Hide less-important columns from tables on mobile ─ */
+  .table .hide-mobile { display: none }
+}
+
+/* ── Very small phones: 380px ── */
+@media (max-width: 380px) {
+  .page { padding: 10px 10px 20px }
+  .kpi-value { font-size: 20px }
+  .graph-canvas { height: 280px }
+  .nav-label { display: none !important }
+  .nav-item { padding: 10px 2px }
+}
+
