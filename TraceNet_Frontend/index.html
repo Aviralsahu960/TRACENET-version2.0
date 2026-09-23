@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
   <div class="app">
@@ -86,6 +86,42 @@
     </div>
   </div>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
+
+  <!-- Remove Netlify's injected attribution badge so it doesn't overlap the mobile bottom nav -->
+  <script>
+    (function removenetlifybadge() {
+      function killBadge() {
+        // Netlify badge selectors (they change occasionally, cover all known variants)
+        const selectors = [
+          '#netlify-identity-widget',
+          'a[href*="netlify.com"][target="_blank"]',
+          'div[class*="netlify"]',
+          'iframe[src*="netlify"]',
+          '[data-netlify]',
+          '.netlify-badge',
+          '#netlify-badge'
+        ];
+        selectors.forEach(function(sel) {
+          document.querySelectorAll(sel).forEach(function(el) {
+            // Only remove if it looks like the badge (fixed position at bottom)
+            var style = window.getComputedStyle(el);
+            if (style.position === 'fixed' || el.tagName === 'IFRAME' || sel.includes('badge') || el.href) {
+              el.style.cssText = 'display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;';
+            }
+          });
+        });
+      }
+      // Run immediately
+      killBadge();
+      // Run after DOM ready
+      document.addEventListener('DOMContentLoaded', killBadge);
+      // Watch for dynamic injection
+      var obs = new MutationObserver(killBadge);
+      obs.observe(document.documentElement, { childList: true, subtree: true });
+      // Stop watching after 10s (badge is injected quickly)
+      setTimeout(function() { obs.disconnect(); }, 10000);
+    })();
+  </script>
 </body>
 </html>

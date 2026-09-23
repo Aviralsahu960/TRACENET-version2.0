@@ -347,6 +347,19 @@ textarea.form-input{height:auto;padding:10px 12px;resize:vertical;min-height:80p
 .toast.ok{background:#0e2823;color:#2dd4bf;border:1px solid rgba(45,212,191,.4);box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .toast.err{background:#280a12;color:#ff4f6a;border:1px solid rgba(255,79,106,.4);box-shadow:0 10px 30px rgba(0,0,0,.5)}
 
+/* ───── Hide Netlify badge (overlaps mobile bottom nav) ───── */
+/* Netlify injects this as a fixed iframe or anchor in the bottom-right */
+[data-netlify-deploy-id],
+.netlify-badge,
+#netlify-badge,
+a[href*="netlify.com"][target="_blank"]:not([class]),
+iframe[src*="netlify.com/badge"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* ───── Mobile Top-Bar (hidden on desktop, shown on mobile) ───── */
 .mobile-topbar {
   display: none;
