@@ -3,7 +3,7 @@
 > Detecting financial crime by mapping transaction networks as a graph and using GraphSAGE to identify suspicious patterns across accounts — built on real, verified criminal data.
 
 [![Backend](https://img.shields.io/badge/Backend-Railway%20Live-success?logo=railway)](https://tracenet-version20-production.up.railway.app)
-[![Frontend](https://img.shields.io/badge/Frontend-Netlify%20Live-00C7B7?logo=netlify)](https://tracenetaml-v2.netlify.app)
+[![Frontend](https://img.shields.io/badge/Frontend-Netlify%20Live-00C7B7?logo=netlify)](https://tracenetaml.netlify.app)
 [![Model](https://img.shields.io/badge/Model-GraphSAGE%203--Layer-blue?logo=pytorch)](https://pytorch-geometric.readthedocs.io)
 [![Accuracy](https://img.shields.io/badge/Accuracy-97.62%25-brightgreen)](https://tracenet-version20-production.up.railway.app/model_info)
 [![License](https://img.shields.io/badge/Dataset-Elliptic%20Bitcoin-orange)](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set)
@@ -15,7 +15,7 @@
 | Service | URL | Status |
 |---|---|---|
 | **Backend API** (Railway) | https://tracenet-version20-production.up.railway.app | ✅ Live |
-| **Frontend** (Netlify) | https://tracenet-v2.netlify.app | ✅ Live |
+| **Frontend** (Netlify) | https://tracenetaml.netlify.app | ✅ Live |
 | **API Docs** | https://tracenet-version20-production.up.railway.app/docs | ✅ Interactive |
 | **Health Check** | https://tracenet-version20-production.up.railway.app/health | ✅ 200 OK |
 
