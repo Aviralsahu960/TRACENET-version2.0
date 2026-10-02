@@ -3,9 +3,9 @@
 > Detecting financial crime by mapping transaction networks as a graph and using GraphSAGE to identify suspicious patterns across accounts — built on real, verified criminal data.
 
 [![Backend](https://img.shields.io/badge/Backend-Railway%20Live-success?logo=railway)](https://tracenet-version20-production.up.railway.app)
-[![Frontend](https://img.shields.io/badge/Frontend-Netlify%20Live-00C7B7?logo=netlify)](https://tracenet-v2.netlify.app)
+[![Frontend](https://img.shields.io/badge/Frontend-Netlify%20Live-00C7B7?logo=netlify)](https://tracenetaml.netlify.app)
 [![Model](https://img.shields.io/badge/Model-GraphSAGE%203--Layer-blue?logo=pytorch)](https://pytorch-geometric.readthedocs.io)
-[![Accuracy](https://img.shields.io/badge/Accuracy-97.62%25-brightgreen)](https://tracenet-version20-production.up.railway.app/model_info)
+[![Accuracy](https://img.shields.io/badge/Accuracy-97.69%25-brightgreen)](https://tracenet-version20-production.up.railway.app/model_info)
 [![License](https://img.shields.io/badge/Dataset-Elliptic%20Bitcoin-orange)](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set)
 
 ---
@@ -15,7 +15,7 @@
 | Service | URL | Status |
 |---|---|---|
 | **Backend API** (Railway) | https://tracenet-version20-production.up.railway.app | ✅ Live |
-| **Frontend** (Netlify) | https://tracenet-v2.netlify.app | ✅ Live |
+| **Frontend** (Netlify) | https://tracenetaml.netlify.app | ✅ Live |
 | **API Docs** | https://tracenet-version20-production.up.railway.app/docs | ✅ Interactive |
 | **Health Check** | https://tracenet-version20-production.up.railway.app/health | ✅ 200 OK |
 
@@ -39,9 +39,9 @@ TraceNet maps every transaction as a graph (accounts/transactions = nodes, money
 |---|---|---|
 | **Dataset** | Synthetic (Faker-generated fake data) | Real — Elliptic Bitcoin Dataset (verified by professional forensics analysts) |
 | **Evaluation** | Evaluated on training data (data leakage) | Strict 80/20 train/test split — model never sees test nodes during training |
-| **Accuracy Claim** | 99.96% (synthetic memory effect) | **97.62%** (honest evaluation on unseen test nodes) |
-| **Recall** | 100% (synthetic) | **92.52%** (caught 841 of 909 actual illicit transactions) |
-| **Class Imbalance** | Not handled | Weighted loss — 9.2x penalty for missing illicit transactions |
+| **Accuracy Claim** | 99.96% (synthetic memory effect) | **97.69%** (honest evaluation on unseen test nodes) |
+| **Recall** | 100% (synthetic) | **92.19%** (caught 838 of 909 actual illicit transactions) |
+| **Class Imbalance** | Not handled | Weighted loss — 9.25x penalty for missing illicit transactions |
 | **Threshold System** | Binary block/approve | Three-zone: Auto Approve / Human Review / Auto Block |
 | **Data Scale** | ~5,000 synthetic nodes | 46,564 real verified nodes, 36,624 edges |
 | **Explainability** | None | Gradient × Input feature attribution per transaction |
@@ -86,7 +86,7 @@ Output: log-softmax → risk probability (licit / illicit)
 ```
 
 * **Total parameters:** 59,714
-* **Loss function:** Weighted Negative Log-Likelihood (NLL Loss with 9.24x weight for illicit class)
+* **Loss function:** Weighted Negative Log-Likelihood (NLL Loss with 9.25x weight for illicit class)
 * **Optimizer:** Adam (learning rate 0.005, weight decay 5e-4)
 
 ---
@@ -97,14 +97,14 @@ Evaluated on **9,313 test nodes** that were completely unseen during training:
 
 | Metric | Value | Detail |
 |---|---|---|
-| **Accuracy** | **97.62%** | Overall correct predictions |
-| **Precision (Illicit)** | **84.52%** | Of all transactions flagged as illicit, 84.52% were real criminals |
-| **Recall (Illicit)** | **92.52%** | Of all actual illicit transactions, 92.52% were caught |
-| **F1 Score (Illicit)** | **88.34%** | Harmonic mean of precision and recall |
-| **True Positives (TP)** | 841 | Illicit transactions correctly caught |
-| **False Positives (FP)** | 154 | Licit transactions flagged for review |
-| **False Negatives (FN)** | 68 | Illicit transactions missed |
-| **True Negatives (TN)** | 8,250 | Licit transactions correctly cleared |
+| **Accuracy** | **97.69%** | Overall correct predictions |
+| **Precision (Illicit)** | **85.34%** | Of all transactions flagged as illicit, 85.34% were real criminals |
+| **Recall (Illicit)** | **92.19%** | Of all actual illicit transactions, 92.19% were caught |
+| **F1 Score (Illicit)** | **88.63%** | Harmonic mean of precision and recall |
+| **True Positives (TP)** | 838 | Illicit transactions correctly caught |
+| **False Positives (FP)** | 144 | Licit transactions flagged for review |
+| **False Negatives (FN)** | 71 | Illicit transactions missed |
+| **True Negatives (TN)** | 8,260 | Licit transactions correctly cleared |
 
 ### Three-Zone Confidence System
 

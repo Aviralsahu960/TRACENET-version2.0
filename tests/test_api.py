@@ -104,7 +104,7 @@ class TestModelInfo:
     def test_accuracy_is_realistic(self):
         res = client.get("/model_info")
         data = res.json()
-        # Our model achieved 97.62%
+        # Our model achieved 97.69% (verified against models/gnn_model.pth)
         assert 90.0 <= data["accuracy"] <= 100.0
 
     def test_model_info_has_zone_thresholds(self):
