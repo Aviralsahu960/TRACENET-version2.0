@@ -65,7 +65,7 @@ function getOfflineFallback(endpoint, opts = {}) {
       graph_loaded: true,
       session_loaded: true,
       model_name: 'GraphSAGE 3-Layer (Cloud Demo)',
-      accuracy: 97.54,
+      accuracy: 97.69,
       graph_nodes: 46564,
       graph_edges: 36624,
       uptime_seconds: 1420,
@@ -86,14 +86,18 @@ function getOfflineFallback(endpoint, opts = {}) {
   if (ep === '/model_info') {
     return {
       architecture: 'GraphSAGE 3-layer (166→128→64→2)',
-      accuracy: 97.54,
-      precision: 89.40,
-      illicit_recall: 92.52,
-      f1_score: 90.93,
+      accuracy: 97.69,
+      precision: 85.34,
+      precision_illicit: 85.34,
+      recall: 92.19,
+      recall_illicit: 92.19,
+      illicit_recall: 92.19,
+      f1_score: 88.63,
+      f1_illicit: 88.63,
       parameters: 59714,
       dataset: 'Elliptic Bitcoin Dataset (203,769 transactions)',
-      train_nodes: 29800,
-      test_nodes: 16764
+      train_nodes: 37251,
+      test_nodes: 9313
     };
   }
   if (ep === '/communities') {
@@ -373,7 +377,7 @@ async function refreshBackendStatus() {
     if (dot)  dot.className  = 'status-dot online';
     if (dotM) dotM.className = 'status-dot online';
     const isCloud = API_BASE.includes('railway') || !isLocalhost;
-    const acc = _healthData.accuracy ? _healthData.accuracy.toFixed(1) : '97.6';
+    const acc = _healthData.accuracy ? _healthData.accuracy.toFixed(1) : '97.7';
     const statusText = isCloud ? `Railway Active (${acc}%)` : `Local GNN (${acc}%)`;
     if (lbl)  lbl.textContent  = isCloud ? `Railway Cloud Active (${acc}%)` : `Local GNN Active (${acc}%)`;
     if (lblM) lblM.textContent = statusText;
@@ -437,7 +441,7 @@ async function renderDashboard() {
       </div>
       <div class="sys-chips">
         <span class="sys-chip">Model: GraphSAGE v2.1</span>
-        <span class="sys-chip">Accuracy: 97.54%</span>
+        <span class="sys-chip">Accuracy: 97.69%</span>
         <span class="sys-chip">Nodes: 46,564 in Memory</span>
         <span class="sys-chip">Edges: 36,624</span>
       </div>
@@ -448,7 +452,7 @@ async function renderDashboard() {
       ${kpi('Total Dataset Nodes', '46,564', '36,624 network edges', 'cyan')}
       ${kpi('Approved (Licit)', '42,019', '90.2% legitimate network', 'green', 'up')}
       ${kpi('Flagged (Illicit)', '4,545', '9.8% confirmed illicit', 'red', 'down')}
-      ${kpi('Model Test Accuracy', '97.54%', '92.52% illicit recall', 'blue')}
+      ${kpi('Model Test Accuracy', '97.69%', '92.19% illicit recall', 'blue')}
     </div>
 
     <!-- Middle: Session throughput + Model Info -->
@@ -1595,10 +1599,10 @@ async function renderModel() {
   if (!el) return;
 
   const cfg = info || {};
-  const acc = cfg.accuracy || 97.54;
-  const prec = cfg.precision || 89.4;
-  const rec = cfg.illicit_recall || cfg.recall || 92.52;
-  const f1 = cfg.f1_score || 90.93;
+  const acc = cfg.accuracy || 97.69;
+  const prec = cfg.precision_illicit || cfg.precision || 85.34;
+  const rec = cfg.recall_illicit || cfg.illicit_recall || cfg.recall || 92.19;
+  const f1 = cfg.f1_illicit || cfg.f1_score || 88.63;
 
   el.innerHTML = `
     <!-- Top Metrics -->
@@ -1621,7 +1625,7 @@ async function renderModel() {
           <div class="kv-row"><span class="kv-key">Input Feature Dimension</span><span class="kv-val font-mono">166 features</span></div>
           <div class="kv-row"><span class="kv-key">Layer 1 (SAGEConv)</span><span class="kv-val font-mono">166 → 128 (ReLU + Dropout 0.3)</span></div>
           <div class="kv-row"><span class="kv-key">Layer 2 (SAGEConv)</span><span class="kv-val font-mono">128 → 64 (ReLU + Dropout 0.3)</span></div>
-          <div class="kv-row"><span class="kv-key">Layer 3 (Linear Classifier)</span><span class="kv-val font-mono">64 → 2 (LogSoftmax)</span></div>
+          <div class="kv-row"><span class="kv-key">Layer 3 (SAGEConv Graph Convolution)</span><span class="kv-val font-mono">64 → 2 (LogSoftmax)</span></div>
           <div class="kv-row"><span class="kv-key">Aggregation Function</span><span class="kv-val font-mono">Mean Aggregator (Inductive)</span></div>
           <div class="kv-row"><span class="kv-key">Total Learnable Parameters</span><span class="kv-val font-mono">${(cfg.parameters || 59714).toLocaleString()}</span></div>
           <div class="kv-row"><span class="kv-key">Receptive Field</span><span class="kv-val font-mono">2-Hop Neighborhood</span></div>
@@ -1636,32 +1640,32 @@ async function renderModel() {
         <div style="display:grid;gap:12px">
           <div>
             <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
-              <span><b>TraceNet GraphSAGE (Ours)</b></span><b style="color:var(--cyan)">97.54% Accuracy (92.52% Recall)</b>
+              <span><b>TraceNet GraphSAGE (Ours)</b></span><b style="color:var(--cyan)">97.69% Accuracy (92.19% Recall)</b>
             </div>
-            <div class="progress-bar"><div class="fill fill-cyan" style="width:97.5%"></div></div>
+            <div class="progress-bar"><div class="fill fill-cyan" style="width:97.7%"></div></div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
-              <span>Random Forest (Node Features Only)</span><span>78.20% Accuracy (61.40% Recall)</span>
+              <span>Gradient Boosting (All 166 Features)</span><span>98.22% Accuracy (94.50% Recall)</span>
             </div>
-            <div class="progress-bar"><div class="fill fill-yellow" style="width:78.2%"></div></div>
+            <div class="progress-bar"><div class="fill fill-yellow" style="width:98.2%"></div></div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
-              <span>XGBoost (Tabular Baseline)</span><span>81.50% Accuracy (67.10% Recall)</span>
+              <span>Random Forest (All 166 Features)</span><span>98.99% Accuracy (90.76% Recall)</span>
             </div>
-            <div class="progress-bar"><div class="fill fill-orange" style="width:81.5%"></div></div>
+            <div class="progress-bar"><div class="fill fill-orange" style="width:99.0%"></div></div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
-              <span>Standard MLP (No Graph Context)</span><span>74.10% Accuracy (52.30% Recall)</span>
+              <span>Logistic Regression (All 166 Features)</span><span>88.00% Accuracy (93.07% Recall)</span>
             </div>
-            <div class="progress-bar"><div class="fill fill-red" style="width:74.1%"></div></div>
+            <div class="progress-bar"><div class="fill fill-red" style="width:88.0%"></div></div>
           </div>
         </div>
 
         <div style="margin-top:16px;padding:12px;background:rgba(49,230,209,.05);border-radius:8px;border:1px solid rgba(49,230,209,.2);font-size:11px;color:#b9cbd6;line-height:1.6">
-          💡 <b>Why GNNs Excel:</b> Money launderers evade tabular rules by breaking transactions into normal-looking amounts. By aggregating 2-hop structural graph context, GraphSAGE spots mule clusters regardless of individual transaction size.
+          💡 <b>Why GNNs Matter in Production:</b> The Elliptic dataset pre-computes neighbourhood statistics (features f94–f165) into the feature vector, giving tree models graph info for free. In real banking deployments (SWIFT, UPI, RTGS), those neighbourhood stats <i>do not exist</i> for a new incoming transaction. GraphSAGE dynamically synthesises graph context at inference time, detects mule-ring clusters, and provides per-transaction subgraph explainability — capabilities no tabular model can replicate regardless of features.
         </div>
       </div>
     </div>`;
@@ -1818,7 +1822,7 @@ function downloadReport(reportType) {
     filename = 'Graph_Forensics_Network.json';
     mimeType = 'application/json';
   } else {
-    content = JSON.stringify({ model: "GraphSAGE 3-Layer", accuracy: 97.54, recall: 92.52, parameters: 59714 }, null, 2);
+    content = JSON.stringify({ model: "GraphSAGE 3-Layer", accuracy: 97.69, precision_illicit: 85.34, recall_illicit: 92.19, f1_illicit: 88.63, parameters: 59714, tp: 838, fp: 144, fn: 71, tn: 8260, test_nodes: 9313 }, null, 2);
     filename = 'Model_Validation_Metrics.json';
     mimeType = 'application/json';
   }
@@ -1837,7 +1841,7 @@ function exportFullDossier() {
   const fullPkg = {
     exported_at: new Date().toISOString(),
     system: "TraceNet v2.1 Inductive AML GNN",
-    model_metrics: { accuracy: 97.54, recall: 92.52, f1: 90.93 },
+    model_metrics: { accuracy: 97.69, precision_illicit: 85.34, recall_illicit: 92.19, f1_illicit: 88.63, tp: 838, fp: 144, fn: 71, tn: 8260, test_nodes: 9313 },
     flagged_entities: CURATED_TRANSACTIONS,
     clusters: _communitiesData?.communities || [],
     compliance_certifications: ["FATF Rec.16", "PMLA 2002", "GDPR Art.6(1)(f)"],
